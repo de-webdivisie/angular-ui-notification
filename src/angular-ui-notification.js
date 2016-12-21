@@ -1,6 +1,6 @@
-angular.module('ui-notification',[]);
+angular.module('ui-notification', []);
 
-angular.module('ui-notification').provider('Notification', function() {
+angular.module('ui-notification').provider('Notification', function () {
 
     this.options = {
         delay: 5000,
@@ -18,12 +18,12 @@ angular.module('ui-notification').provider('Notification', function() {
         container: 'body'
     };
 
-    this.setOptions = function(options) {
+    this.setOptions = function (options) {
         if (!angular.isObject(options)) throw new Error("Options should be an object!");
         this.options = angular.extend({}, this.options, options);
     };
 
-    this.$get = function($timeout, $http, $compile, $templateCache, $rootScope, $injector, $sce, $q, $window) {
+    this.$get = function ($timeout, $http, $compile, $templateCache, $rootScope, $injector, $sce, $q, $window) {
         var options = this.options;
 
         var startTop = options.startTop;
@@ -35,17 +35,17 @@ angular.module('ui-notification').provider('Notification', function() {
         var messageElements = [];
         var isResizeBound = false;
 
-        var notify = function(args, t){
+        var notify = function (args, t) {
             var deferred = $q.defer();
 
             if (typeof args !== 'object') {
-                args = {message:args};
+                args = {message: args};
             }
 
             args.scope = args.scope ? args.scope : $rootScope;
             args.template = args.templateUrl ? args.templateUrl : options.templateUrl;
             args.delay = !angular.isUndefined(args.delay) ? args.delay : delay;
-            args.type = t || args.type || options.type ||  '';
+            args.type = t || args.type || options.type || '';
             args.positionY = args.positionY ? args.positionY : options.positionY;
             args.positionX = args.positionX ? args.positionX : options.positionX;
             args.replaceMessage = args.replaceMessage ? args.replaceMessage : options.replaceMessage;
@@ -53,21 +53,21 @@ angular.module('ui-notification').provider('Notification', function() {
             args.closeOnClick = (args.closeOnClick !== null && args.closeOnClick !== undefined) ? args.closeOnClick : options.closeOnClick;
             args.container = args.container ? args.container : options.container;
 
-            if(args.template!='angular-ui-notification.html'){
+            if (args.template != 'angular-ui-notification.html') {
                 // load it via $http only if it isn't default template
-                $http.get(args.template,{cache: $templateCache})
+                $http.get(args.template, {cache: $templateCache})
                     .then(processNotificationTemplate)
-                    .catch(function(data){
-                        throw new Error('Template ('+args.template+') could not be loaded. ' + data);
+                    .catch(function (data) {
+                        throw new Error('Template (' + args.template + ') could not be loaded. ' + data);
                     });
-            }else{
+            } else {
                 // load directly form $templateCache! to make it working on pages loaded like file:// specifically for cordova
-                var template=$templateCache.get('angular-ui-notification.html');
-                if(template){
+                var template = $templateCache.get('angular-ui-notification.html');
+                if (template) {
                     processNotificationTemplate(template);
-                }else{
+                } else {
                     // means something really broken if we are unable to load default template
-                    throw new Error('Template ('+args.template+') could not be loaded. ' + data);
+                    throw new Error('Template (' + args.template + ') could not be loaded. ' + data);
                 }
 
             }
@@ -77,29 +77,29 @@ angular.module('ui-notification').provider('Notification', function() {
                 var scope = args.scope.$new();
                 scope.message = $sce.trustAsHtml(args.message);
                 scope.title = $sce.trustAsHtml(args.title);
-                scope.t = args.type.substr(0,1);
+                scope.t = args.type.substr(0, 1);
                 scope.delay = args.delay;
                 scope.onClose = args.onClose;
 
-                var reposite = function() {
+                var reposite = function () {
                     var j = 0;
                     var k = 0;
                     var lastTop = startTop;
                     var lastRight = startRight;
                     var lastPosition = [];
-                    for(var i = messageElements.length - 1; i >= 0; i --) {
-                        var element  = messageElements[i];
+                    for (var i = messageElements.length - 1; i >= 0; i--) {
+                        var element = messageElements[i];
                         if (args.replaceMessage && i < messageElements.length - 1) {
                             element.addClass('killed');
                             continue;
                         }
                         var elHeight = parseInt(element[0].offsetHeight);
-                        var elWidth  = parseInt(element[0].offsetWidth);
-                        var position = lastPosition[element._positionY+element._positionX];
+                        var elWidth = parseInt(element[0].offsetWidth);
+                        var position = lastPosition[element._positionY + element._positionX];
 
                         if ((top + elHeight) > window.innerHeight) {
                             position = startTop;
-                            k ++;
+                            k++;
                             j = 0;
                         }
 
@@ -113,13 +113,13 @@ angular.module('ui-notification').provider('Notification', function() {
                             element.css(element._positionX, right + 'px');
                         }
 
-                        lastPosition[element._positionY+element._positionX] = top + elHeight;
+                        lastPosition[element._positionY + element._positionX] = top + elHeight;
 
                         if (options.maxCount > 0 && messageElements.length > options.maxCount && i === 0) {
                             element.scope().kill(true);
                         }
 
-                        j ++;
+                        j++;
                     }
                 };
 
@@ -128,9 +128,9 @@ angular.module('ui-notification').provider('Notification', function() {
                 templateElement._positionX = args.positionX;
                 templateElement.addClass(args.type);
 
-                var closeEvent = function(e) {
+                var closeEvent = function (e) {
                     e = e.originalEvent || e;
-                    if (e.type === 'click' || (e.propertyName === 'opacity' && e.elapsedTime >= 1)){
+                    if (e.type === 'click' || (e.propertyName === 'opacity' && e.elapsedTime >= 1)) {
                         if (scope.onClose) {
                             scope.$apply(scope.onClose(templateElement));
                         }
@@ -150,7 +150,7 @@ angular.module('ui-notification').provider('Notification', function() {
                 templateElement.bind('webkitTransitionEnd oTransitionEnd otransitionend transitionend msTransitionEnd', closeEvent);
 
                 if (angular.isNumber(args.delay)) {
-                    $timeout(function() {
+                    $timeout(function () {
                         templateElement.addClass('killed');
                     }, args.delay);
                 }
@@ -162,24 +162,24 @@ angular.module('ui-notification').provider('Notification', function() {
                 templateElement.css(templateElement._positionY, offset + "px");
                 messageElements.push(templateElement);
 
-                if(args.positionX == 'center'){
+                if (args.positionX == 'center') {
                     var elWidth = parseInt(templateElement[0].offsetWidth);
                     templateElement.css('left', parseInt(window.innerWidth / 2 - elWidth / 2) + 'px');
                 }
 
-                $timeout(function(){
+                $timeout(function () {
                     setCssTransitions('');
                 });
 
-                function setCssTransitions(value){
-                    ['-webkit-transition', '-o-transition', 'transition'].forEach(function(prefix){
+                function setCssTransitions(value) {
+                    ['-webkit-transition', '-o-transition', 'transition'].forEach(function (prefix) {
                         templateElement.css(prefix, value);
                     });
                 }
 
                 scope._templateElement = templateElement;
 
-                scope.kill = function(isHard) {
+                scope.kill = function (isHard) {
                     if (isHard) {
                         if (scope.onClose) {
                             scope.$apply(scope.onClose(scope._templateElement));
@@ -197,7 +197,7 @@ angular.module('ui-notification').provider('Notification', function() {
                 $timeout(reposite);
 
                 if (!isResizeBound) {
-                    angular.element($window).bind('resize', function(e) {
+                    angular.element($window).bind('resize', function (e) {
                         $timeout(reposite);
                     });
                     isResizeBound = true;
@@ -210,24 +210,24 @@ angular.module('ui-notification').provider('Notification', function() {
             return deferred.promise;
         };
 
-        notify.primary = function(args) {
+        notify.primary = function (args) {
             return this(args, 'primary');
         };
-        notify.error = function(args) {
+        notify.error = function (args) {
             return this(args, 'error');
         };
-        notify.success = function(args) {
+        notify.success = function (args) {
             return this(args, 'success');
         };
-        notify.info = function(args) {
+        notify.info = function (args) {
             return this(args, 'info');
         };
-        notify.warning = function(args) {
+        notify.warning = function (args) {
             return this(args, 'warning');
         };
 
-        notify.clearAll = function() {
-            angular.forEach(messageElements, function(element) {
+        notify.clearAll = function () {
+            angular.forEach(messageElements, function (element) {
                 element.addClass('killed');
             });
         };
