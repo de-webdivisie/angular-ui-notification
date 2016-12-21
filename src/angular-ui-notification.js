@@ -72,7 +72,6 @@ angular.module('ui-notification').provider('Notification', function() {
 
             }
 
-
             function processNotificationTemplate(template) {
 
                 var scope = args.scope.$new();

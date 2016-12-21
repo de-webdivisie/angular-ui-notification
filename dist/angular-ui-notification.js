@@ -79,7 +79,6 @@ angular.module('ui-notification').provider('Notification', function() {
 
             }
 
-
             function processNotificationTemplate(template) {
 
                 var scope = args.scope.$new();
@@ -243,4 +242,5 @@ angular.module('ui-notification').provider('Notification', function() {
         return notify;
     }];
 });
+
 angular.module("ui-notification").run(["$templateCache", function($templateCache) {$templateCache.put("angular-ui-notification.html","<div class=\"ui-notification\"><h3 ng-show=\"title\" ng-bind-html=\"title\"></h3><div class=\"message\" ng-bind-html=\"message\"></div></div>");}]);
