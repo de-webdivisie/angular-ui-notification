@@ -1,7 +1,7 @@
 /**
  * angular-ui-notification - Angular.js service providing simple notifications using Bootstrap 3 styles with css transitions for animating
  * @author Alex_Crack
- * @version v0.3.1
+ * @version v0.3.2
  * @link https://github.com/alexcrack/angular-ui-notification
  * @license MIT
  */
@@ -60,7 +60,27 @@ angular.module('ui-notification').provider('Notification', function() {
             args.closeOnClick = (args.closeOnClick !== null && args.closeOnClick !== undefined) ? args.closeOnClick : options.closeOnClick;
             args.container = args.container ? args.container : options.container;
 
-            $http.get(args.template,{cache: $templateCache}).then(function(template) {
+            if(args.template!='angular-ui-notification.html'){
+                // load it via $http only if it isn't default template
+                $http.get(args.template,{cache: $templateCache})
+                    .then(processNotificationTemplate)
+                    .catch(function(data){
+                        throw new Error('Template ('+args.template+') could not be loaded. ' + data);
+                    });
+            }else{
+                // load directly form $templateCache! to make it working on pages loaded like file:// specifically for cordova
+                var template=$templateCache.get('angular-ui-notification.html');
+                if(template){
+                    processNotificationTemplate(template);
+                }else{
+                    // means something really broken if we are unable to load default template
+                    throw new Error('Template ('+args.template+') could not be loaded. ' + data);
+                }
+
+            }
+
+
+            function processNotificationTemplate(template) {
 
                 var scope = args.scope.$new();
                 scope.message = $sce.trustAsHtml(args.message);
@@ -145,7 +165,7 @@ angular.module('ui-notification').provider('Notification', function() {
 
                 setCssTransitions('none');
 
-                angular.element(document.querySelector(args.container)).append(templateElement);
+                angular.element(document.getElementsByTagName('body')).append(templateElement);
                 var offset = -(parseInt(templateElement[0].offsetHeight) + 50);
                 templateElement.css(templateElement._positionY, offset + "px");
                 messageElements.push(templateElement);
@@ -193,9 +213,7 @@ angular.module('ui-notification').provider('Notification', function() {
 
                 deferred.resolve(scope);
 
-            }, function(data){
-                throw new Error('Template ('+args.template+') could not be loaded. ' + data);
-            });
+            }
 
             return deferred.promise;
         };
@@ -225,5 +243,4 @@ angular.module('ui-notification').provider('Notification', function() {
         return notify;
     }];
 });
-
 angular.module("ui-notification").run(["$templateCache", function($templateCache) {$templateCache.put("angular-ui-notification.html","<div class=\"ui-notification\"><h3 ng-show=\"title\" ng-bind-html=\"title\"></h3><div class=\"message\" ng-bind-html=\"message\"></div></div>");}]);
