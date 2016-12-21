@@ -52,7 +52,7 @@ angular.module('ui-notification').provider('Notification', function() {
             args.scope = args.scope ? args.scope : $rootScope;
             args.template = args.templateUrl ? args.templateUrl : options.templateUrl;
             args.delay = !angular.isUndefined(args.delay) ? args.delay : delay;
-            args.type = t || options.type ||  '';
+            args.type = t || args.type || options.type ||  '';
             args.positionY = args.positionY ? args.positionY : options.positionY;
             args.positionX = args.positionX ? args.positionX : options.positionX;
             args.replaceMessage = args.replaceMessage ? args.replaceMessage : options.replaceMessage;
@@ -60,7 +60,7 @@ angular.module('ui-notification').provider('Notification', function() {
             args.closeOnClick = (args.closeOnClick !== null && args.closeOnClick !== undefined) ? args.closeOnClick : options.closeOnClick;
             args.container = args.container ? args.container : options.container;
 
-            $http.get(args.template,{cache: $templateCache}).success(function(template) {
+            $http.get(args.template,{cache: $templateCache}).then(function(template) {
 
                 var scope = args.scope.$new();
                 scope.message = $sce.trustAsHtml(args.message);
@@ -193,7 +193,7 @@ angular.module('ui-notification').provider('Notification', function() {
 
                 deferred.resolve(scope);
 
-            }).error(function(data){
+            }, function(data){
                 throw new Error('Template ('+args.template+') could not be loaded. ' + data);
             });
 
